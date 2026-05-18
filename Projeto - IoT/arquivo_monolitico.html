@@ -1,0 +1,777 @@
+<!doctype html>
+
+<html class="dark" lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Metropolis:wght@300;400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #0d1515;
+        color: #dce4e4;
+        overflow-x: hidden;
+      }
+      .glass-panel {
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(21, 29, 30, 0.15);
+      }
+      .neon-glow-primary {
+        box-shadow: 0 0 15px rgba(0, 219, 231, 0.3);
+        border: 1px solid rgba(0, 219, 231, 0.5);
+      }
+      .neon-glow-error {
+        box-shadow: 0 0 15px rgba(255, 180, 171, 0.3);
+        border: 1px solid rgba(255, 180, 171, 0.5);
+      }
+      .scanning-line {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00f2ff, transparent);
+        top: 0;
+        left: 0;
+        animation: scan 3s linear infinite;
+      }
+      @keyframes scan {
+        0% {
+          top: 0%;
+        }
+        100% {
+          top: 100%;
+        }
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      /* Custom Select Styling for consistency with theme */
+      .custom-select {
+        background: rgba(46, 54, 55, 0.5);
+        border: 1px solid rgba(132, 148, 149, 0.3);
+        color: #dce4e4;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+      }
+      .custom-select:focus {
+        outline: none;
+        border-color: #00dbe7;
+        box-shadow: 0 0 5px rgba(0, 219, 231, 0.2);
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-container": "#fed83a",
+              "on-primary-container": "#006a71",
+              "inverse-on-surface": "#2a3232",
+              error: "#ffb4ab",
+              "inverse-surface": "#dce4e4",
+              "on-tertiary": "#3b2f00",
+              "on-background": "#dce4e4",
+              "on-tertiary-container": "#725e00",
+              "on-secondary": "#2d3137",
+              "on-primary-fixed": "#002022",
+              outline: "#849495",
+              "surface-container-lowest": "#080f10",
+              "surface-container-low": "#151d1e",
+              "inverse-primary": "#00696f",
+              "on-primary": "#00363a",
+              "secondary-fixed-dim": "#c3c6cf",
+              "on-surface": "#dce4e4",
+              "primary-container": "#00f2ff",
+              "on-tertiary-fixed-variant": "#554500",
+              "on-primary-fixed-variant": "#004f54",
+              "surface-tint": "#00dbe7",
+              "secondary-container": "#454950",
+              "error-container": "#93000a",
+              "on-surface-variant": "#b9cacb",
+              "on-error": "#690005",
+              "on-secondary-fixed-variant": "#43474e",
+              background: "#0d1515",
+              "surface-container-high": "#232b2c",
+              "secondary-fixed": "#dfe2eb",
+              "outline-variant": "#3a494b",
+              "on-tertiary-fixed": "#221b00",
+              "primary-fixed-dim": "#00dbe7",
+              "tertiary-fixed": "#ffe173",
+              secondary: "#c3c6cf",
+              "surface-container": "#192122",
+              "on-secondary-container": "#b5b8c1",
+              "on-secondary-fixed": "#181c22",
+              "surface-bright": "#333b3b",
+              primary: "#e1fdff",
+              tertiary: "#fff6e4",
+              "surface-dim": "#0d1515",
+              surface: "#0d1515",
+              "on-error-container": "#ffdad6",
+              "primary-fixed": "#74f5ff",
+              "surface-variant": "#2e3637",
+              "surface-container-highest": "#2e3637",
+              "tertiary-fixed-dim": "#e8c423",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              unit: "8px",
+              "margin-mobile": "16px",
+              "container-max": "1440px",
+              gutter: "24px",
+              "margin-desktop": "40px",
+            },
+            fontFamily: {
+              "label-technical": ["JetBrains Mono"],
+              "headline-md": ["Space Grotesk"],
+              "body-lg": ["Metropolis"],
+              "display-xl": ["Space Grotesk"],
+              "label-sm": ["JetBrains Mono"],
+              "headline-lg": ["Space Grotesk"],
+              "body-md": ["Metropolis"],
+            },
+            fontSize: {
+              "label-technical": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.05em",
+                  fontWeight: "500",
+                },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+              "display-xl": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", fontWeight: "600" },
+              ],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-body-md text-on-background bg-background min-h-screen">
+    <!-- TopAppBar -->
+    <header
+      class="sticky top-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 bg-surface/15 backdrop-blur-xl border-b border-white/10"
+    >
+      <div class="flex items-center gap-6">
+        <h1
+          class="font-display-xl text-display-xl tracking-tighter text-primary dark:text-primary-fixed-dim"
+        >
+          Rodovia Inteligente Segura
+        </h1>
+        <div class="hidden md:flex items-center gap-8 ml-10">
+          <nav class="flex gap-6">
+            <a
+              class="text-primary font-bold border-b-2 border-primary pb-1 font-label-technical text-label-technical"
+              href="#"
+              >Dashboard</a
+            >
+            <a
+              class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-technical text-label-technical"
+              href="#"
+              >Mapa</a
+            >
+            <a
+              class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-technical text-label-technical"
+              href="#"
+              >Sensores</a
+            >
+            <a
+              class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-technical text-label-technical"
+              href="#"
+              >Alertas</a
+            >
+          </nav>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button
+          class="p-2 rounded-full hover:bg-white/5 transition-all text-on-surface-variant hover:text-primary"
+        >
+          <span class="material-symbols-outlined" data-icon="notifications"
+            >notifications</span
+          >
+        </button>
+        <button
+          class="p-2 rounded-full hover:bg-white/5 transition-all text-on-surface-variant hover:text-primary"
+        >
+          <span class="material-symbols-outlined" data-icon="settings"
+            >settings</span
+          >
+        </button>
+        <button
+          class="p-2 rounded-full hover:bg-white/5 transition-all text-on-surface-variant hover:text-primary"
+        >
+          <span class="material-symbols-outlined" data-icon="account_circle"
+            >account_circle</span
+          >
+        </button>
+      </div>
+    </header>
+    <div class="flex min-h-[calc(100vh-80px)]">
+      <!-- SideNavBar -->
+      <aside
+        class="hidden lg:flex flex-col py-gutter w-64 bg-surface-container-low/15 backdrop-blur-20 border-r border-white/10 shrink-0"
+      >
+        <div class="px-6 mb-10">
+          <p class="font-label-technical text-label-technical text-primary">
+            Admin do Sistema
+          </p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">
+            ID Operador: 4029
+          </p>
+        </div>
+        <div class="space-y-1">
+          <a
+            class="flex items-center gap-4 bg-primary/10 text-primary border-l-4 border-primary px-4 py-3 font-label-technical text-label-technical translate-x-1 duration-200"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="dashboard"
+              >dashboard</span
+            >
+            Dashboard
+          </a>
+          <a
+            class="flex items-center gap-4 text-on-surface-variant px-4 py-3 font-label-technical text-label-technical hover:bg-white/5 hover:text-primary transition-all duration-300"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="map">map</span>
+            Mapa
+          </a>
+          <a
+            class="flex items-center gap-4 text-on-surface-variant px-4 py-3 font-label-technical text-label-technical hover:bg-white/5 hover:text-primary transition-all duration-300"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="sensors"
+              >sensors</span
+            >
+            Sensores
+          </a>
+          <a
+            class="flex items-center gap-4 text-on-surface-variant px-4 py-3 font-label-technical text-label-technical hover:bg-white/5 hover:text-primary transition-all duration-300"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="warning"
+              >warning</span
+            >
+            Alertas
+          </a>
+        </div>
+        <div class="mt-auto px-4">
+          <button
+            class="w-full py-3 bg-error-container text-on-error-container rounded-lg font-bold font-label-technical uppercase flex items-center justify-center gap-2 hover:opacity-80 transition-all"
+          >
+            <span class="material-symbols-outlined" data-icon="emergency"
+              >emergency</span
+            >
+            Protocolo de Emergência
+          </button>
+          <div class="mt-6 flex flex-col gap-2">
+            <a
+              class="flex items-center gap-4 text-on-surface-variant px-4 py-2 font-label-technical text-label-technical hover:text-primary transition-all"
+              href="#"
+            >
+              <span class="material-symbols-outlined" data-icon="help"
+                >help</span
+              >
+              Suporte
+            </a>
+            <a
+              class="flex items-center gap-4 text-on-surface-variant px-4 py-2 font-label-technical text-label-technical hover:text-primary transition-all"
+              href="#"
+            >
+              <span class="material-symbols-outlined" data-icon="history"
+                >history</span
+              >
+              Logs
+            </a>
+          </div>
+        </div>
+      </aside>
+      <!-- Main Content -->
+      <main
+        class="flex-1 p-margin-desktop max-w-container-max mx-auto w-full grid grid-cols-12 gap-gutter"
+      >
+        <!-- Main Status Card -->
+        <section class="col-span-12">
+          <div
+            class="glass-panel neon-glow-primary rounded-xl p-8 relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6"
+          >
+            <div class="scanning-line"></div>
+            <div class="flex items-center gap-6">
+              <div
+                class="h-20 w-20 rounded-full border-4 border-primary flex items-center justify-center animate-pulse"
+              >
+                <span
+                  class="material-symbols-outlined text-4xl text-primary"
+                  data-icon="shield_check"
+                  >shield</span
+                >
+              </div>
+              <div>
+                <p
+                  class="font-label-technical text-label-technical text-on-surface-variant uppercase tracking-widest"
+                >
+                  Integridade do Ambiente Atual
+                </p>
+                <h2
+                  class="font-display-xl text-headline-lg text-primary uppercase"
+                >
+                  Status do Sistema: Excelente
+                </h2>
+              </div>
+            </div>
+            <div class="flex gap-4 text-right">
+              <div>
+                <p
+                  class="font-label-technical text-label-technical text-on-surface-variant"
+                >
+                  Sensores Ativos
+                </p>
+                <p class="font-headline-md text-headline-md text-primary">
+                  124 / 124
+                </p>
+              </div>
+              <div class="w-px h-12 bg-white/10 self-center"></div>
+              <div>
+                <p
+                  class="font-label-technical text-label-technical text-on-surface-variant"
+                >
+                  Cobertura
+                </p>
+                <p class="font-headline-md text-headline-md text-primary">
+                  99.8%
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Sensor Overview Grid -->
+        <div class="col-span-12 lg:col-span-8 grid grid-cols-2 gap-gutter">
+          <!-- PIR Motion Sensors -->
+          <article
+            class="glass-panel rounded-xl p-6 col-span-2 md:col-span-1 border-l-4 border-primary"
+          >
+            <div class="flex justify-between items-start mb-6">
+              <p
+                class="font-label-technical text-label-technical text-primary uppercase"
+              >
+                Detecção de Movimento (PIR)
+              </p>
+              <span
+                class="material-symbols-outlined text-primary-fixed-dim"
+                data-icon="sensors_krx"
+                >sensors_krx</span
+              >
+            </div>
+            <div class="flex items-end justify-between mb-8">
+              <div>
+                <h3 class="font-headline-lg text-headline-lg text-on-surface">
+                  Estável
+                </h3>
+                <p class="font-body-md text-on-surface-variant">
+                  Nenhum movimento detectado no Setor 04
+                </p>
+              </div>
+              <div class="flex gap-1 h-12 items-end">
+                <div class="w-2 bg-primary/20 h-4"></div>
+                <div class="w-2 bg-primary/40 h-6"></div>
+                <div class="w-2 bg-primary/20 h-3"></div>
+                <div class="w-2 bg-primary/60 h-8"></div>
+                <div class="w-2 bg-primary/10 h-2"></div>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div
+                class="flex items-center justify-between text-sm glass-panel p-3 rounded bg-white/5"
+              >
+                <span class="text-on-surface-variant">Nó PIR-102</span>
+                <span class="text-primary font-bold">ATIVO</span>
+              </div>
+              <div
+                class="flex items-center justify-between text-sm glass-panel p-3 rounded bg-white/5"
+              >
+                <span class="text-on-surface-variant">Nó PIR-103</span>
+                <span class="text-primary font-bold">ATIVO</span>
+              </div>
+            </div>
+          </article>
+          <!-- Ultrasonic Sensors -->
+          <article
+            class="glass-panel rounded-xl p-6 col-span-2 md:col-span-1 border-l-4 border-tertiary-fixed-dim"
+          >
+            <div class="flex justify-between items-start mb-6">
+              <p
+                class="font-label-technical text-label-technical text-tertiary-fixed-dim uppercase"
+              >
+                Distância Ultrassônica
+              </p>
+              <span
+                class="material-symbols-outlined text-tertiary-fixed-dim"
+                data-icon="radar"
+                >radar</span
+              >
+            </div>
+            <div class="flex items-end justify-between mb-8">
+              <div>
+                <h3 class="font-headline-lg text-headline-lg text-on-surface">
+                  Caminho Livre
+                </h3>
+                <p class="font-body-md text-on-surface-variant">
+                  Detecção de Obstáculos: proximidade 0.0m
+                </p>
+              </div>
+              <div class="relative w-16 h-16">
+                <div
+                  class="absolute inset-0 rounded-full border-4 border-tertiary-fixed-dim/20"
+                ></div>
+                <div
+                  class="absolute inset-0 rounded-full border-t-4 border-tertiary-fixed-dim animate-spin"
+                ></div>
+              </div>
+            </div>
+            <div
+              class="flex items-center gap-4 glass-panel p-4 rounded-lg bg-white/5"
+            >
+              <div class="flex-1">
+                <p
+                  class="font-label-technical text-label-technical text-on-surface-variant"
+                >
+                  Objeto Mais Próximo
+                </p>
+                <p
+                  class="font-headline-md text-headline-md text-tertiary-fixed-dim"
+                >
+                  &gt; 15.0m
+                </p>
+              </div>
+              <span
+                class="material-symbols-outlined text-tertiary-fixed-dim text-3xl"
+                data-icon="check_circle"
+                >check_circle</span
+              >
+            </div>
+          </article>
+          <!-- Visual Alert Zone: Map -->
+          <section
+            class="col-span-2 glass-panel rounded-xl p-6 min-h-[400px] flex flex-col"
+          >
+            <div class="flex justify-between items-center mb-6">
+              <h4 class="font-headline-md text-headline-md text-on-surface">
+                Topografia da Rodovia em Tempo Real
+              </h4>
+              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-3 h-3 rounded-full bg-primary shadow-[0_0_8px_#00dbe7]"
+                  ></div>
+                  <span
+                    class="text-xs text-on-surface-variant font-label-technical uppercase"
+                    >Fluxo Normal</span
+                  >
+                </div>
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-3 h-3 rounded-full bg-tertiary shadow-[0_0_8px_#fed83a]"
+                  ></div>
+                  <span
+                    class="text-xs text-on-surface-variant font-label-technical uppercase"
+                    >Obstáculo</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div
+              class="flex-1 relative bg-surface-container-highest/50 rounded-lg overflow-hidden border border-white/5"
+            >
+              <img
+                class="w-full h-full object-cover opacity-40 mix-blend-luminosity"
+                data-alt="A stylized overhead architectural view of a futuristic smart highway at night with glowing neon green lanes. The visual atmosphere is dark obsidian with sleek lines of light indicating sensors and data traffic flowing alongside the asphalt. Soft cyan glows indicate active IoT nodes embedded in the road surface."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtpdoXaBuubyTLFpH_YkyRiDG8cGO_jo1QJg4Q_Wy_WUr702B3JJZL8NrFMI2r3jWOJfPiybMxukz-rXleO1DjKLGPtDppdBqtnCy6_WBHG7iLuFEU5EdE3SW6bq8EZtkWw4eE0KPabBuH2X1U_lEwQvUGr_fK_J2rH1wYV9ndMggFmYgaQDq90eBmO0m8hnYTzEPjFsIc1UP796WO29ZNENh5pHNaS9ObIuMOXUXyvkCeHHwAbMjuxLPgMZlPCIwhBsQF1SFiLdbT"
+              />
+              <!-- Overlay HUD Elements -->
+              <div
+                class="absolute inset-0 p-8 flex flex-col justify-between pointer-events-none"
+              >
+                <div class="flex justify-between">
+                  <div
+                    class="p-2 border border-primary/40 bg-background/60 backdrop-blur-md rounded"
+                  >
+                    <p class="text-[10px] font-label-technical text-primary">
+                      CAM_OESTE_04
+                    </p>
+                    <p
+                      class="text-[10px] font-label-technical text-on-surface-variant"
+                    >
+                      SEC: 142.08
+                    </p>
+                  </div>
+                  <div
+                    class="p-2 border border-primary/40 bg-background/60 backdrop-blur-md rounded"
+                  >
+                    <p class="text-[10px] font-label-technical text-primary">
+                      NÓ_STATUS_ONLINE
+                    </p>
+                    <p
+                      class="text-[10px] font-label-technical text-on-surface-variant"
+                    >
+                      LAT: -23.55 | LON: -46.63
+                    </p>
+                  </div>
+                </div>
+                <!-- Visual Data Points -->
+                <div
+                  class="absolute top-1/2 left-1/3 w-4 h-4 bg-primary rounded-full neon-glow-primary animate-ping"
+                ></div>
+                <div
+                  class="absolute top-1/4 right-1/4 w-3 h-3 bg-primary/50 rounded-full"
+                ></div>
+                <div
+                  class="absolute bottom-1/3 left-1/2 w-4 h-4 bg-primary rounded-full neon-glow-primary animate-pulse"
+                ></div>
+                <div class="flex justify-center">
+                  <div
+                    class="bg-background/80 backdrop-blur-xl border border-white/10 px-6 py-2 rounded-full flex items-center gap-4"
+                  >
+                    <p
+                      class="font-label-technical text-label-technical text-on-surface"
+                    >
+                      Área de Vigilância Rodovia KM 142-150
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <!-- Side Panel: Incident Log & Tech Icons -->
+        <aside class="col-span-12 lg:col-span-4 flex flex-col gap-gutter">
+          <!-- Incident Log -->
+          <article class="glass-panel rounded-xl p-6 flex flex-col h-full">
+            <div class="flex items-center gap-3 mb-6">
+              <span
+                class="material-symbols-outlined text-primary"
+                data-icon="history"
+                >history</span
+              >
+              <h4 class="font-headline-md text-headline-md text-on-surface">
+                Registro de Atividades
+              </h4>
+            </div>
+            <!-- Activity Filter Bar -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+              <div class="flex flex-col gap-1">
+                <label
+                  class="text-[10px] font-label-technical text-on-surface-variant uppercase tracking-wider"
+                  >Localidade</label
+                >
+                <select class="custom-select h-9 px-3 rounded-lg focus:ring-0">
+                  <option value="all">Todos os Setores</option>
+                  <option value="km142">KM 142 - Oeste</option>
+                  <option value="km150">KM 150 - Leste</option>
+                  <option value="s04">Setor 04 (Vigilância)</option>
+                </select>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label
+                  class="text-[10px] font-label-technical text-on-surface-variant uppercase tracking-wider"
+                  >Período</label
+                >
+                <select class="custom-select h-9 px-3 rounded-lg focus:ring-0">
+                  <option value="hours">Últimas horas</option>
+                  <option value="days">Últimos dias</option>
+                </select>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div
+                class="p-4 rounded-lg bg-surface-container-highest/30 border border-white/5 hover:border-primary/40 transition-all cursor-default"
+              >
+                <p
+                  class="font-label-technical text-label-technical text-primary mb-1"
+                >
+                  09:45 AM
+                </p>
+                <p class="font-body-md text-on-surface font-medium">
+                  Movimento detectado no KM 142
+                </p>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">
+                  ID Sensor PIR: 88A • Verificado
+                </p>
+              </div>
+              <div
+                class="p-4 rounded-lg bg-surface-container-highest/30 border border-white/5 hover:border-primary/40 transition-all cursor-default"
+              >
+                <p
+                  class="font-label-technical text-label-technical text-on-surface-variant mb-1"
+                >
+                  08:12 AM
+                </p>
+                <p class="font-body-md text-on-surface font-medium">
+                  Caminho Livre - Atualização de Distância
+                </p>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">
+                  Ultrassônico: Setor 09 • Normal
+                </p>
+              </div>
+              <div
+                class="p-4 rounded-lg bg-surface-container-highest/30 border border-white/5 hover:border-primary/40 transition-all cursor-default"
+              >
+                <p
+                  class="font-label-technical text-label-technical text-on-surface-variant mb-1"
+                >
+                  07:55 AM
+                </p>
+                <p class="font-body-md text-on-surface font-medium">
+                  Diagnóstico do Sistema Concluído
+                </p>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">
+                  Todos os 124 sensores sincronizados
+                </p>
+              </div>
+            </div>
+            <button
+              class="mt-8 text-primary font-label-technical text-label-technical flex items-center justify-center gap-2 hover:underline"
+            >
+              Ver Histórico Completo
+              <span
+                class="material-symbols-outlined text-sm"
+                data-icon="arrow_forward"
+                >arrow_forward</span
+              >
+            </button>
+            <!-- Tech Icons Footer -->
+            <div
+              class="mt-auto pt-8 border-t border-white/10 grid grid-cols-3 gap-4"
+            >
+              <div
+                class="flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity"
+              >
+                <span
+                  class="material-symbols-outlined text-2xl"
+                  data-icon="router"
+                  >router</span
+                >
+                <span class="text-[10px] font-label-technical">MQTT 3.1</span>
+              </div>
+              <div
+                class="flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity"
+              >
+                <span
+                  class="material-symbols-outlined text-2xl"
+                  data-icon="cloud_sync"
+                  >cloud_sync</span
+                >
+                <span class="text-[10px] font-label-technical"
+                  >SYNC: AO VIVO</span
+                >
+              </div>
+              <div
+                class="flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity"
+              >
+                <span class="material-symbols-outlined text-2xl" data-icon="lan"
+                  >lan</span
+                >
+                <span class="text-[10px] font-label-technical">P2P MESH</span>
+              </div>
+            </div>
+          </article>
+          <!-- Simplified Status Indicators -->
+          <div class="glass-panel rounded-xl p-6 flex flex-col gap-4">
+            <p
+              class="font-label-technical text-label-technical text-on-surface-variant uppercase"
+            >
+              Latência da Rede
+            </p>
+            <div class="flex items-center gap-4">
+              <div
+                class="flex-1 h-2 bg-surface-container-highest rounded-full overflow-hidden"
+              >
+                <div class="w-[85%] h-full bg-primary neon-glow-primary"></div>
+              </div>
+              <span
+                class="font-label-technical text-label-technical text-primary"
+                >12ms</span
+              >
+            </div>
+            <div class="flex justify-between items-center mt-2">
+              <div class="flex items-center gap-2">
+                <span
+                  class="material-symbols-outlined text-primary text-sm"
+                  data-icon="wifi"
+                  >wifi</span
+                >
+                <span
+                  class="text-xs font-label-technical text-on-surface-variant uppercase"
+                  >Link de Fibra</span
+                >
+              </div>
+              <span class="text-xs font-label-technical text-primary uppercase"
+                >Conectado</span
+              >
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+    <!-- Bottom Navigation Bar for Mobile -->
+    <nav
+      class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-low/80 backdrop-blur-20 border-t border-white/10 flex justify-around py-4 z-50"
+    >
+      <button class="flex flex-col items-center gap-1 text-primary">
+        <span class="material-symbols-outlined" data-icon="dashboard"
+          >dashboard</span
+        >
+        <span class="text-[10px] font-label-technical">Dash</span>
+      </button>
+      <button class="flex flex-col items-center gap-1 text-on-surface-variant">
+        <span class="material-symbols-outlined" data-icon="map">map</span>
+        <span class="text-[10px] font-label-technical">Mapa</span>
+      </button>
+      <button class="flex flex-col items-center gap-1 text-on-surface-variant">
+        <span class="material-symbols-outlined" data-icon="sensors"
+          >sensors</span
+        >
+        <span class="text-[10px] font-label-technical">Sensores</span>
+      </button>
+      <button class="flex flex-col items-center gap-1 text-on-surface-variant">
+        <span class="material-symbols-outlined" data-icon="warning"
+          >warning</span
+        >
+        <span class="text-[10px] font-label-technical">Alertas</span>
+      </button>
+    </nav>
+  </body>
+</html>
