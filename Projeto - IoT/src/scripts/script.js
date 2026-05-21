@@ -1,10 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* ── Botão de Emergência ── */
     const btnEmergencia = document.getElementById('btnEmergencia');
 
     btnEmergencia.addEventListener('click', () => {
-        // Flash vermelho no body
         document.body.style.transition = 'background-color 0.2s';
         document.body.style.backgroundColor = '#220000';
         setTimeout(() => { document.body.style.backgroundColor = ''; }, 2000);
@@ -13,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    /* ── Logs Dinâmicos (simulação de novos eventos) ── */
     const logContainer = document.getElementById('logContainer');
 
     const initialLogs = [
@@ -33,13 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return entry;
     };
 
-    // Renderiza os logs iniciais preservando os que já estão no HTML,
-    // ou adiciona novos se o container estiver vazio.
     if (!logContainer.children.length) {
         initialLogs.forEach(log => logContainer.appendChild(buildEntry(log)));
     }
 
-    // Simula chegada de novos logs a cada 15 s
     const liveMessages = [
         { msg: 'Sensor PIR-104 recalibrado',          sub: 'Setor 07 • Auto-calibração concluída'          },
         { msg: 'Leitura ultrassônica nominal',         sub: 'Distância: 18.3m • Setor 11'                  },
@@ -62,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isPrimary: Math.random() > 0.6,
         });
 
-        // Insere no topo com animação suave
         entry.style.opacity = '0';
         entry.style.transform = 'translateY(-8px)';
         entry.style.transition = 'opacity 0.4s, transform 0.4s';
@@ -72,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
             entry.style.transform = 'translateY(0)';
         });
 
-        // Mantém no máximo 6 entradas
         while (logContainer.children.length > 6) {
             logContainer.removeChild(logContainer.lastChild);
         }
@@ -83,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(addLiveLog, 15000);
 
 
-    /* ── Botão "Ver Histórico Completo" ── */
     const viewAllBtn = document.querySelector('.view-all-btn');
     if (viewAllBtn) {
         viewAllBtn.addEventListener('click', () => {
@@ -92,15 +83,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* ── Latência animada (oscila levemente) ── */
     const latencyFill  = document.querySelector('.latency-fill');
     const latencyValue = document.querySelector('.latency-value');
 
     if (latencyFill && latencyValue) {
         const animateLatency = () => {
-            // Simula latência entre 8 ms e 18 ms
             const ms  = Math.floor(Math.random() * 10) + 8;
-            const pct = 70 + (ms / 20) * 20; // mapeia 8-18ms → ~78-88%
+            const pct = 70 + (ms / 20) * 20;
             latencyFill.style.width  = pct + '%';
             latencyValue.textContent = ms + 'ms';
         };
@@ -108,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* ── Destaque no sensor PIR quando há "detecção" ── */
     const cardPIR = document.getElementById('cardPIR');
 
     const simulatePIREvent = () => {
@@ -124,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (titleEl) titleEl.textContent = 'Detecção!';
             if (descEl)  descEl.textContent  = 'Movimento registrado no Setor 04';
 
-            // Adiciona ao log
             const now = new Date();
             const hh  = String(now.getHours()).padStart(2, '0');
             const mm  = String(now.getMinutes()).padStart(2, '0');
@@ -147,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 logContainer.removeChild(logContainer.lastChild);
             }
 
-            // Volta ao normal após 3 s
             setTimeout(() => {
                 cardPIR.style.borderColor = '';
                 cardPIR.style.boxShadow   = '';
