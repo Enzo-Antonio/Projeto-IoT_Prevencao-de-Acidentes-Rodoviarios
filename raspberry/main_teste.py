@@ -8,9 +8,9 @@ from machine import Pin, PWM
 from utime import sleep, sleep_ms, sleep_us, ticks_diff, ticks_us
 
 pir1 = Pin(27, Pin.IN)
-pir2 = Pin(26, Pin.IN)
+
 trig1, echo1 = Pin(2, Pin.OUT), Pin(3, Pin.IN)
-trig2, echo2 = Pin(4, Pin.OUT), Pin(5, Pin.IN)
+
 led_red = Pin(15, Pin.OUT)
 buzzer = PWM(Pin(18))
 buzzer.duty_u16(0)
@@ -43,9 +43,9 @@ def medir_distancia(trig, echo):
 def calcular_velocidade(trig, echo):
     distancia1 = medir_distancia(trig, echo)
     sleep_ms(50)
-    distancia2 = medir_distancia(trig, echo)
+    
 
-    if distancia1 < 0 or distancia2 < 0:
+    if distancia1 < 0:
         return -1
 
     return abs(distancia2 - distancia1) / 50
@@ -71,13 +71,13 @@ else:
 
         # ── 3. Loop principal ─────────────────────────────────────
         while True:
-            estado_pir1, estado_pir2 = pir1.value(), pir2.value()
+            estado_pir1 = pir1.value()
 
-            if estado_pir1 == 1 or estado_pir2 == 1:
+            if estado_pir1 == 1:
                 velocidade1 = calcular_velocidade(trig1, echo1)
-                velocidade2 = calcular_velocidade(trig2, echo2)
+                
 
-                if velocidade1 < 0 and velocidade2 < 0:
+                if velocidade1 < 0:
                     print("Erro: Sensores Ultrassonicos nao respondendo.")
                     sleep_ms(200)
                     continue
