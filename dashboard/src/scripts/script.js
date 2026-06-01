@@ -1,162 +1,156 @@
-document.addEventListener('DOMContentLoaded', () => {
+// script.js — Lógica do Dashboard (Sincronizado estritamente com o main.py)
+// ─────────────────────────────────────────────────────────────────────────────
 
-    /* ── Botão de Emergência ── */
-    const btnEmergencia = document.getElementById('btnEmergencia');
+// ── 1. Configurações de Conexão ──────────────────────────────────────────────
+// Altere o IP abaixo para o valor exato de BROKER_IP contido no seu config.py
+const BROKER = "ws://10.132.112.4:8000";
+// Deve ser idêntico ao TOPIC_PUB do seu config.py
+const TOPICO = "senai/grupo2/prevencao-acidentes";
+// ClientID gerado dinamicamente para evitar conflitos de sessão
+const CLIENT_ID = "dashboard_" + Math.random().toString(16).slice(2, 8);
 
-    btnEmergencia.addEventListener('click', () => {
-        // Flash vermelho no body
-        document.body.style.transition = 'background-color 0.2s';
-        document.body.style.backgroundColor = '#220000';
-        setTimeout(() => { document.body.style.backgroundColor = ''; }, 2000);
+// ── 2. Elementos do HTML / Mapeamento do Layout ──────────────────────────────
+const statusTexto = document.getElementById("statusRede");
+const painelStatusGeral = document.getElementById("painelStatusGeral");
+const picoStatusText = document.getElementById("picoStatusText");
+const picoDistanciaTexto = document.getElementById("picoDistanciaTexto"); // Onde a velocidade será impressa
+const logContainer = document.getElementById("logContainer");
 
-        alert('PROTOCOLO DE EMERGÊNCIA ATIVADO!\nAutoridades notificadas.');
-    });
+// Elementos de Controle Visual do Card (CSS Dinâmico)
+const picoCard = document.getElementById("picoCard");
+const picoCardLabel = document.getElementById("picoCardLabel");
+const picoIcon = document.getElementById("picoIcon");
 
+// Variável global de estado para agrupar as duas transmissões consecutivas do Pico
+let ultimoTipoDetectado = "";
 
-    /* ── Logs Dinâmicos (simulação de novos eventos) ── */
-    const logContainer = document.getElementById('logContainer');
+// ── 3. Funções de Atualização da Interface ───────────────────────────────────
 
-    const initialLogs = [
-        { time: '09:45 AM', msg: 'Movimento detectado no KM 142',       sub: 'ID Sensor PIR: 88A • Verificado',              isPrimary: true  },
-        { time: '08:12 AM', msg: 'Caminho Livre - Atualização de Distância', sub: 'Ultrassônico: Setor 09 • Normal',          isPrimary: false },
-        { time: '07:55 AM', msg: 'Diagnóstico do Sistema Concluído',     sub: 'Todos os 124 sensores sincronizados',          isPrimary: false },
-    ];
+function atualizarStatus(conectado) {
+  if (statusTexto) {
+    statusTexto.textContent = conectado ? "ONLINE" : "DESCONECTADO";
+    statusTexto.style.color = conectado
+      ? "var(--primary-fixed-dim)"
+      : "var(--error-bg)";
+  }
+  if (painelStatusGeral) {
+    painelStatusGeral.textContent = conectado
+      ? "SISTEMA OPERACIONAL"
+      : "Aguardando Conexão...";
+  }
+}
 
-    const buildEntry = ({ time, msg, sub, isPrimary }) => {
-        const entry = document.createElement('div');
-        entry.className = 'log-entry';
-        entry.innerHTML = `
-            <p class="log-time ${isPrimary ? 'text-primary' : 'text-muted'}">${time}</p>
-            <p class="log-msg">${msg}</p>
-            <p class="log-sub">${sub}</p>
-        `;
-        return entry;
-    };
+function adicionarLogDoPico(tipo, velocidade, corHora) {
+  const hora = new Date().toLocaleTimeString("pt-BR");
 
-    // Renderiza os logs iniciais preservando os que já estão no HTML,
-    // ou adiciona novos se o container estiver vazio.
-    if (!logContainer.children.length) {
-        initialLogs.forEach(log => logContainer.appendChild(buildEntry(log)));
+  // Remove o aviso inicial estático assim que a primeira telemetria real chega
+  const placeholder = logContainer.querySelector(".placeholder-entry");
+  if (placeholder) placeholder.remove();
+
+  // Monta a estrutura HTML exigida pelo seu CSS
+  const novoLog = document.createElement("div");
+  novoLog.className = "log-entry";
+  novoLog.innerHTML = `
+        <p class="log-time ${corHora}">[${hora}]</p>
+        <p class="log-msg">${tipo} Detectado</p>
+        <p class="log-sub">Módulo: Pico 2W • Radar: ${velocidade}</p>
+    `;
+
+  // Injeta o log sempre no topo do contêiner lateral
+  logContainer.insertBefore(novoLog, logContainer.firstChild);
+
+  // Sistema de trava (FIFO) com limite de 4 itens para preservar a integridade do layout
+  if (logContainer.children.length > 4) {
+    logContainer.removeChild(logContainer.lastChild);
+  }
+}
+
+// ── 4. Tratamento de Dados (Casamento estrito com as strings do Python) ──────
+function exibirMensagem(topico, mensagem) {
+  const payload = mensagem.trim();
+
+  // PASSO A: O main.py disparou a mensagem de TIPO (Ex: "TIPO: ANIMAL SILVESTRE.")
+  if (payload.startsWith("TIPO:")) {
+    // Remove a etiqueta "TIPO:", elimina o ponto final "." e limpa espaços vazios
+    ultimoTipoDetectado = payload.replace("TIPO:", "").replace(".", "").trim();
+    return; // Sai da função e retém o valor na memória até que a velocidade chegue
+  }
+
+  // PASSO B: O main.py disparou a mensagem de VELOCIDADE (Ex: "VEL: 0.025 cm/ms")
+  if (payload.startsWith("VEL:") && ultimoTipoDetectado !== "") {
+    const velocidadeTexto = payload.replace("VEL:", "").trim();
+
+    // INTERRUPÇÃO CRÍTICA: Se o Python classificou como ANIMAL SILVESTRE
+    if (ultimoTipoDetectado === "ANIMAL SILVESTRE") {
+      if (picoStatusText) picoStatusText.textContent = "ANIMAL NA PISTA";
+      if (picoDistanciaTexto) {
+        picoDistanciaTexto.textContent = velocidadeTexto;
+        picoDistanciaTexto.style.color = "var(--accent-yellow)";
+      }
+
+      // Transiciona o card para a estilização de perigo amarela do seu CSS
+      if (picoCard)
+        picoCard.className = "glass-panel sensor-card border-yellow";
+      if (picoCardLabel) picoCardLabel.className = "card-tag-label text-yellow";
+      if (picoIcon)
+        picoIcon.className = "material-symbols-outlined text-yellow";
+
+      adicionarLogDoPico(ultimoTipoDetectado, velocidadeTexto, "text-yellow");
+    } else {
+      // FLUXO NORMAL: Se for VEICULO ou OBJETO COMUM/RUIDO
+      if (picoStatusText) picoStatusText.textContent = ultimoTipoDetectado;
+      if (picoDistanciaTexto) {
+        picoDistanciaTexto.textContent = velocidadeTexto;
+        picoDistanciaTexto.style.color = "var(--primary-fixed-dim)";
+      }
+
+      // Mantém ou retorna o card para os tons estáveis de azul ciano
+      if (picoCard)
+        picoCard.className = "glass-panel sensor-card border-primary";
+      if (picoCardLabel) picoCardLabel.className = "card-tag-label text-muted";
+      if (picoIcon)
+        picoIcon.className = "material-symbols-outlined text-primary";
+
+      adicionarLogDoPico(ultimoTipoDetectado, velocidadeTexto, "text-primary");
     }
 
-    // Simula chegada de novos logs a cada 15 s
-    const liveMessages = [
-        { msg: 'Sensor PIR-104 recalibrado',          sub: 'Setor 07 • Auto-calibração concluída'          },
-        { msg: 'Leitura ultrassônica nominal',         sub: 'Distância: 18.3m • Setor 11'                  },
-        { msg: 'Link MQTT renovado',                   sub: 'Broker: mqtt.rod-smart.local • Latência: 11ms' },
-        { msg: 'Câmera CAM_LESTE_02 sincronizada',     sub: 'Feed de vídeo estável • 1080p/30fps'           },
-        { msg: 'Nenhum obstáculo detectado – KM 148',  sub: 'Sensor Ultra-09 • Normal'                      },
-    ];
-    let liveIdx = 0;
+    // Zera a memória temporária deixando o script pronto para o próximo loop do hardware
+    ultimoTipoDetectado = "";
+  }
+}
 
-    const addLiveLog = () => {
-        const now = new Date();
-        const hh   = String(now.getHours()).padStart(2, '0');
-        const mm   = String(now.getMinutes()).padStart(2, '0');
-        const ss   = String(now.getSeconds()).padStart(2, '0');
+// ── 5. Orquestração de Eventos MQTT.js ───────────────────────────────────────
+console.log(`Estabelecendo canal WebSocket com o Broker: ${BROKER}`);
+const cliente = mqtt.connect(BROKER, {
+  clientId: CLIENT_ID,
+  clean: true,
+});
 
-        const entry = buildEntry({
-            time: `${hh}:${mm}:${ss}`,
-            msg:  liveMessages[liveIdx % liveMessages.length].msg,
-            sub:  liveMessages[liveIdx % liveMessages.length].sub,
-            isPrimary: Math.random() > 0.6,
-        });
+// Listener: Sucesso na conexão com a máquina servidora
+cliente.on("connect", () => {
+  atualizarStatus(true);
+  console.log("Conectado com sucesso ao ecossistema MQTT.");
 
-        // Insere no topo com animação suave
-        entry.style.opacity = '0';
-        entry.style.transform = 'translateY(-8px)';
-        entry.style.transition = 'opacity 0.4s, transform 0.4s';
-        logContainer.prepend(entry);
-        requestAnimationFrame(() => {
-            entry.style.opacity = '1';
-            entry.style.transform = 'translateY(0)';
-        });
-
-        // Mantém no máximo 6 entradas
-        while (logContainer.children.length > 6) {
-            logContainer.removeChild(logContainer.lastChild);
-        }
-
-        liveIdx++;
-    };
-
-    setInterval(addLiveLog, 15000);
-
-
-    /* ── Botão "Ver Histórico Completo" ── */
-    const viewAllBtn = document.querySelector('.view-all-btn');
-    if (viewAllBtn) {
-        viewAllBtn.addEventListener('click', () => {
-            alert('Funcionalidade de histórico completo em desenvolvimento.');
-        });
+  cliente.subscribe(TOPICO, (err) => {
+    if (!err) {
+      console.log(`Escuta ativa estabelecida no tópico: "${TOPICO}"`);
     }
+  });
+});
 
+// Listener: Receptor ativo do fluxo de mensagens (O porteiro de rede)
+cliente.on("message", (topico, payload) => {
+  const mensagem = payload.toString();
+  exibirMensagem(topico, mensagem);
+});
 
-    /* ── Latência animada (oscila levemente) ── */
-    const latencyFill  = document.querySelector('.latency-fill');
-    const latencyValue = document.querySelector('.latency-value');
+// Listener: Tratamento de falhas de rede ou timeout
+cliente.on("error", (err) => {
+  atualizarStatus(false);
+  console.error(`[FALHA MQTT]: ${err.message}`);
+});
 
-    if (latencyFill && latencyValue) {
-        const animateLatency = () => {
-            // Simula latência entre 8 ms e 18 ms
-            const ms  = Math.floor(Math.random() * 10) + 8;
-            const pct = 70 + (ms / 20) * 20; // mapeia 8-18ms → ~78-88%
-            latencyFill.style.width  = pct + '%';
-            latencyValue.textContent = ms + 'ms';
-        };
-        setInterval(animateLatency, 3000);
-    }
-
-
-    /* ── Destaque no sensor PIR quando há "detecção" ── */
-    const cardPIR = document.getElementById('cardPIR');
-
-    const simulatePIREvent = () => {
-        if (!cardPIR) return;
-        const detected = Math.random() > 0.7;
-        const titleEl  = cardPIR.querySelector('.card-title');
-        const descEl   = cardPIR.querySelector('.card-desc');
-
-        if (detected) {
-            cardPIR.style.transition  = 'border-color 0.3s, box-shadow 0.3s';
-            cardPIR.style.borderColor = '#ffb4ab';
-            cardPIR.style.boxShadow   = '0 0 15px rgba(255,180,171,0.3)';
-            if (titleEl) titleEl.textContent = 'Detecção!';
-            if (descEl)  descEl.textContent  = 'Movimento registrado no Setor 04';
-
-            // Adiciona ao log
-            const now = new Date();
-            const hh  = String(now.getHours()).padStart(2, '0');
-            const mm  = String(now.getMinutes()).padStart(2, '0');
-            const ss  = String(now.getSeconds()).padStart(2, '0');
-            const entry = buildEntry({
-                time: `${hh}:${mm}:${ss}`,
-                msg:  'Movimento detectado — Setor 04',
-                sub:  'ID Sensor PIR: 102 • Verificando...',
-                isPrimary: true,
-            });
-            entry.style.opacity   = '0';
-            entry.style.transform = 'translateY(-8px)';
-            entry.style.transition = 'opacity 0.4s, transform 0.4s';
-            logContainer.prepend(entry);
-            requestAnimationFrame(() => {
-                entry.style.opacity   = '1';
-                entry.style.transform = 'translateY(0)';
-            });
-            while (logContainer.children.length > 6) {
-                logContainer.removeChild(logContainer.lastChild);
-            }
-
-            // Volta ao normal após 3 s
-            setTimeout(() => {
-                cardPIR.style.borderColor = '';
-                cardPIR.style.boxShadow   = '';
-                if (titleEl) titleEl.textContent = 'Estável';
-                if (descEl)  descEl.textContent  = 'Nenhum movimento detectado no Setor 04';
-            }, 3000);
-        }
-    };
-
-    setInterval(simulatePIREvent, 20000);
-
+// Listener: Encerramento abrupto ou manual da conexão
+cliente.on("close", () => {
+  atualizarStatus(false);
 });

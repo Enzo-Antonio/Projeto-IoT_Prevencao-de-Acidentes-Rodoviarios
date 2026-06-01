@@ -105,9 +105,12 @@ else:
                     desligar_alertas()
 
                 # CORRIGIDO: mensagem montada com dados reais da iteração atual
-                mensagem = f"TIPO: {tipo} | VEL: {velocidade_max:.3f} cm/ms"
-                cliente.publish(TOPIC_PUB, mensagem.encode())
-                print(f"[PUB] {mensagem}")
+                tipo_mensagem = f"TIPO: {tipo}."
+                cliente.publish(TOPIC_PUB, tipo_mensagem.encode())
+                velocidade_mensagem = f"VEL: {velocidade_max:.3f} cm/ms"
+                cliente.publish(TOPIC_PUB, velocidade_mensagem.encode())
+                
+                print(f"[PUB] {tipo_mensagem} | {velocidade_mensagem}")
 
             else:
                 desligar_alertas()
